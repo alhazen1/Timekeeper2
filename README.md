@@ -1,4 +1,5 @@
-# Timekeeper2 - Coop member timekeeping app 
+# Timekeeper2
+## Timekeeping web app for co-op and orgs
 * Google Apps Script standalone app
  * Secure, free app hosting
 
