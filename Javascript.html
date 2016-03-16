@@ -1,0 +1,303 @@
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-touchspin/3.1.1/jquery.bootstrap-touchspin.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.10.0/js/bootstrap-select.min.js"></script>
+
+
+<script>
+   $(document).ready(function() {
+
+
+      //***********************************************************************************
+      // UI SETUP 
+      //**********************************************************
+
+      // ERROR loading select boxes ******************************
+      function loadError(error, target) {
+         target.empty()
+            .prepend("<option value='error' disabled='disabled'>" + error + "</option>")
+            .addClass("my-error").parent().addClass("has-error");
+      }
+
+      
+      // LOAD FAMILY NAMES and LOAD COOP TASKS SUCCESS ******************************** 
+      function loadList(list, obj) {
+         obj.empty(); //clear before refreshing
+         obj.append(list);
+         obj.removeClass("my-success").parent().removeClass("has-success");
+      }
+
+      
+      function getList(obj, type) {
+         google.script.run.withSuccessHandler(loadList)
+            .withFailureHandler(loadError)
+            .withUserObject(obj)
+            .getListItemsHTML(type);
+      }
+
+      
+      // load select dropdowns
+      getList( $("#family-name"), "names" );
+      getList( $("#coop-task"), "tasks" );
+      
+
+      // DATE PICKER - limited dates available *******************
+      $("#datepicker").datepicker({
+         minDate: new Date(2016, 1 - 1, 1), //yyyy, m(starts @ 0), dd
+         maxDate: +0 // days in future
+      });
+
+      // TIME SPINNER - ******************************************
+      $("#time-worked").TouchSpin({ 
+         initval: "",
+         min: 0, //maybe allow negative for corrections??????????
+         step: 0.25,
+         stepinterval: 100,
+         decimals: 2,
+         forcestepdivisibility: 'none',    
+         //booster: true,
+         //boostat: 10
+         //max: 16,
+      });
+
+
+
+      //**********************************************************
+      // DATA VALIDATION
+      //**********************************************************
+
+      // SUBMIT BUTTONS ******************************************
+      // evaluate enable / disable button(s) status depending on 
+      // which form fields are valid and completed
+      function checkSubmit() {
+      
+         if($("#name-form > div.has-success").length === 1) {
+            $("#report-submit").removeAttr("disabled");
+            //$("#register-submit").removeAttr("disabled"); // only one shot at self-register???
+
+            if($("#time-form > div.has-success").length === 4) {
+               $("#log-submit").removeAttr("disabled");
+            } else {
+               $("#log-submit").attr("disabled", "disabled");
+            }
+
+            
+         } else {
+            $("#report-submit").attr("disabled", "disabled");
+         }
+         
+         if( $("#new-form > div.has-success").length === 1){
+           $("#register-submit").removeAttr("disabled");
+         } else {
+           $("#register-submit").attr("disabled", "disabled");
+         }
+
+      }
+
+
+      // SHOW SUCCESS input valid *************************************
+      function showSuccess(target) {
+        target.addClass("my-success").removeClass("my-error")
+            .closest("div.form-group").addClass("has-success").removeClass("has-error");
+        checkSubmit(); //re-evaluate enable button status
+      }
+
+      // SHOW ERROR input invalid *************************************
+      function showError(target) {
+         target.addClass("my-error").removeClass("my-success")
+            .closest("div.form-group").addClass("has-error").removeClass("has-success");
+         checkSubmit(); //re-evaluate enable button status
+      }
+
+      // SELECT BOXES ***************************************************
+      $("select").change(function() {
+         var obj = $(this);
+         // disable the 'placeholder' option 
+         obj.children().eq(0).attr('disabled', 'disabled');
+
+         if(obj.val() === 'placeholder') {
+            showError(obj);
+         } else {
+            showSuccess(obj);
+         }
+      });
+
+      // DATEPICKER ***************************************************
+      // options constrained by picker config so any value is success
+      $("#datepicker").change(function() {
+         showSuccess($(this));
+      });
+
+      // TIME WORKED ***************************************************
+      // any over 0 is valid - constrained by spinner config to max value
+      function timeCheck() {
+         var obj = $(this);
+
+         if(obj.val() > 0) {
+            showSuccess(obj);
+         } else {
+            showError(obj); 
+         }
+         
+        /* var entered = obj.val();
+         if(entered[entered.length-1] !== '.'){
+           obj.val( Math.round(entered * 100 ) /100 );
+         }*/
+      }
+      
+     $("#time-worked").keyup(timeCheck).change(timeCheck);
+      
+      
+      // NEW NAME *****************************************************
+      $("#new-name").keyup(function() {
+         var obj = $(this);
+         
+         obj.val( obj.val().replace(/^\s+/g,'') ); //remove leading spaces
+
+         if(obj.val().length > 0) {
+            showSuccess(obj);
+         } else {
+            showError(obj);
+         }
+      });
+      
+      
+
+      //*************************************************************************************
+      // BUTTON FUNCTION TIME FORM
+      //**********************************************************
+
+      // CLEAR / RESET TIME FORM *********************************
+      // clear form fields except name, remove validation cues, disable submit button
+      function clearTime() {
+         $("#time-form  div").removeClass("has-success has-error");
+         $('#coop-task').children().eq(0).removeAttr('disabled', 'disabled');
+         $("#notes-group").addClass("has-success"); //optional so always has-success
+         $('#time-form').trigger("reset");
+         $("#log-submit").attr("disabled", "disabled");
+         $("#coop-task").focus();
+         
+         checkSubmit();
+      }
+
+      $("#reset-time").on("click", clearTime);
+
+      // SUBMIT COOP TIME FORM **********************************
+
+      // random confirmation messages ***************************
+      function getSuccess(time) {
+         var replies = ["Score! You just logged " + time + " hours.",
+            "Shazam! That's " + time + " hours for the cause.",
+            "Roger Wilco. We copy that " + time + " hours.",
+            time + " You're the bestest!",
+            "Hat tip to you for that " + time + " hours.",
+            "Ka-ching! You contributed " + time + " hours.",
+            time + " hours. Can you feel the love?"
+         ];
+
+         var rand = Math.floor(Math.random() * (replies.length));
+
+         return replies[rand];
+      }
+
+
+      function sendTime() {
+         $("#log-submit").attr('disabled','disabled');
+
+            google.script.run.withSuccessHandler(function() {
+                  $("#log-submit").attr("disabled", "disabled");
+                  $("#notes").attr("placeholder", getSuccess($("#time-worked").val())); //confirmation message in notes textbox
+                  clearTime();
+                  $('#time-form').trigger("reset");
+               })
+               .withFailureHandler(function() {
+                  $("#notes").attr("placeholder", "Oh noes! Your stuff didn't upload.Try again.");  
+               })
+               .setCoopHours($("#family-name").val(), $("#coop-task").val(), $("#datepicker").val(),
+                  $("#time-worked").val(), $("#notes").val());
+      }
+
+      $("#log-submit").click(sendTime);
+
+
+
+
+      //**********************************************************
+      // BUTTON FUNCTION TIME REPORT FORM
+      //**********************************************************
+
+      //----------------------------------------------------------
+      function makeReport() {
+         $("#report-submit").attr('disabled','disabled');
+            
+            $("#report-message").empty();
+            var reportName = $("#family-name").val();
+
+            if(reportName !== 'placeholder') { //this should never be false but...
+               $("#report-table").empty();
+
+               google.script.run.withSuccessHandler(function(data) {
+                     $("#report-table").append(data);
+                     $("#report-submit").removeAttr("disabled");
+                  })
+                  .withFailureHandler(function() {
+                     $("#report-message").append("<p style='color:red;'>&iexcl;Pinche Interwebs! <br>Something didn't go right.<br> Please try again.</p>");
+                     $("#report-submit").removeAttr("disabled");
+                  })
+                  //.withUserObject($("#report-table"))
+                  .getTimeReport(reportName);
+
+            } else { // placeholder selected as name
+               $("#report-message").append("<p style='color:red;'>I'm sorry, I didn't get your name.<br>Please pick a name from that drop down list above.</p>");
+            }
+      }
+      //----------------------------------------------------------
+
+      // GET TIME REPORT - CLICK HANDLER *************************
+      $("#report-submit").click(makeReport);
+
+
+      //****************************************************************************************
+      // BUTTON FUNCTION SELF-REGISTER FORM
+      //**********************************************************
+
+      //----------------------------------------------------------
+      function sendName() {
+          $("#register-submit").attr('disabled','disabled');
+
+            var addName = $.trim( $("#new-name").val() );
+            $("#new-name").val("");
+            $("#name-message").empty();
+
+            if(addName) { // catch empty new name field - should never happen but...
+
+               google.script.run.withSuccessHandler(function() {
+                     $("#register-submit").attr("disabled", "disabled");
+                     $("#name-message").append("<p>Hi " + addName + "! <br>You're on the team now.</p>");
+                     getList( $("#family-name"), "names" ); // refresh names select box
+                     // moved to function getList success handler
+                     //$("#family-name").removeClass("my-success").parent().removeClass("has-success");
+                     $("#time-tab")[0].click(); // go to time logging tab
+                  })
+                  .withFailureHandler(function() {
+                     $("#name-message").append("<p style='color:red;'>&iexcl;Pinche Interwebs! <br>Something didn't go right.<br> Please try again.</p>");
+                     $("#register-submit").removeAttr("disabled"); 
+                  })
+                  .setFamilyName(addName);
+
+            } else { // input empty 
+               $("#name-message").append("<p style='color:red;'>I think you're missing some letters. <br>Only Prince and Cher don't get last names.</p>");
+               $("#register-submit").removeAttr('disabled');
+            }
+      }
+      //----------------------------------------------------------
+
+      // ADD NEW NAME - CLICK HANDLER *****************************
+      $("#register-submit").click(sendName);
+      
+      // show app after all javascript rendering magic finished
+      $('body').removeClass('hide');
+
+   });
+</script>
