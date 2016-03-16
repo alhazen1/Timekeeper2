@@ -16,4 +16,4 @@
  * jQuery is supported by Caja sanitizer
  * Replaces UI Service app on Google Site
 
-* Optimized for smartphone / fat-thumb entry
+* Optimized for smartphone / one-thumb entry
