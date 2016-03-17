@@ -37,16 +37,18 @@
 //
 //****************************************************************
 // TO DO:
-// On tabbing to 'Check Time' blank out any existing time report
-// Use fewer ID and more class and name attributes
+// X DONE! On tabbing to 'Check Time' blank out any existing time report XXXXXXX
+// X DONE! Cache DOM selectors in variables XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+// Use fewer ID and more class attributes
+// Rename sheet variables to be more meaningful in this context - borrowed code from old app
 
 
 //****************************************************************
 // Spreadsheet key to Google Sheet storing data
 // this key will change if a different sheet is used for data storage
 // look at URL in browser address bar to see spreadsheet key - copy / paste as needed
-// https://docs.google.com/spreadsheets/d/xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-var itemSpreadsheetKey = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx';
+// https://docs.google.com/spreadsheets/d/xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+var itemSpreadsheetKey = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx';
 
 // Open the Google Sheet and reference specific sheets
 var openedSS = SpreadsheetApp.openById(itemSpreadsheetKey);
@@ -92,7 +94,7 @@ var sheet = '';
 }
 
 // Asynchronously load select boxes - Google preferred method vs template
-// for load select boxes when called from browser (refresh lists)
+// for load select boxes when called from browser 
 function getListItemsHTML(type) {
   var sheet = '';
   var placeholder = '';
