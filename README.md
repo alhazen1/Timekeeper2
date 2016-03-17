@@ -19,4 +19,4 @@
 * Optimized for smartphone / one-thumb entry
 
 [Sample App](https://script.google.com/macros/s/AKfycbwNo0zs99ohLaNYYJoixBSdYcg5HjDpD_3Nu1b8XnMuMUP8km4/exec)  
-[Sample Google Sheet](https://docs.google.com/spreadsheets/d/1i27gpP2eC4mQkU_1rskGcBVUSLa6vq15Pvf1qqdUE_o/edit?usp=sharing)
+
