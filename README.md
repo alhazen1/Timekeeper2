@@ -20,3 +20,8 @@
 
 [Sample App](https://script.google.com/macros/s/AKfycbwNo0zs99ohLaNYYJoixBSdYcg5HjDpD_3Nu1b8XnMuMUP8km4/exec)  
 
+-----------------------------------
+Note: If you *do not* host from a Google for Business, Google for Education or similar account your app will have this warning banner. The sample app is hosted by a simple John Q Public gmail account - hence the banner.
+
+![Warning banner](https://raw.githubusercontent.com/alhazen1/Timekeeper2/master/warning.png)
+
